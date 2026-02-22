@@ -1,27 +1,17 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
+  import ShotsMorph from "$lib/components/ShotsMorph.svelte";
+  import SnippetForm from "$lib/components/SnippetForm.svelte";
   import * as Card from "$lib/components/ui/card";
   import { toast } from "svelte-sonner";
   import { enhance } from "$app/forms";
   import { fade, slide } from "svelte/transition";
   import CodeBlock from "$lib/components/CodeBlock.svelte";
-  import SnippetDialog from "$lib/components/SnippetDialog.svelte";
   import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-svelte";
 
   let { data } = $props();
 
   let isDialogOpen = $state(false);
-  let editingSnippet = $state(null);
-
-  function openCreateDialog() {
-    editingSnippet = null;
-    isDialogOpen = true;
-  }
-
-  function openEditDialog(snippet: any) {
-    editingSnippet = snippet;
-    isDialogOpen = true;
-  }
 </script>
 
 <div class="container mx-auto max-w-7xl p-6 md:p-12 space-y-12" in:fade>
@@ -47,21 +37,24 @@
       >
         <ArrowLeft class="size-4" /> Volver
       </Button>
-      <Button
-        onclick={openCreateDialog}
-        class="gap-2 rounded-full h-12 px-8 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-      >
-        <Plus class="size-5" /> Nuevo Fragmento
-      </Button>
+      <ShotsMorph expandWidth="700px" expandHeight="800px">
+        {#snippet mini()}
+          <div
+            class="rounded-[32px] w-[96px] h-[36px] bg-primary flex items-center justify-center gap-1 text-white font-bold text-sm shadow-lg shadow-primary/20 transition-all hover:scale-[1.05] active:scale-[0.95]"
+          >
+            <Plus class="size-4" /> Agregar
+          </div>
+        {/snippet}
+        {#snippet expand()}
+          <SnippetForm
+            languages={data.languages}
+            onSuccess={() => {}}
+            onCancel={() => {}}
+          />
+        {/snippet}
+      </ShotsMorph>
     </div>
   </div>
-
-  <SnippetDialog
-    languages={data.languages}
-    snippet={editingSnippet}
-    bind:open={isDialogOpen}
-    onClose={() => (editingSnippet = null)}
-  />
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     {#each data.snippets as snippet (snippet.id)}
@@ -88,15 +81,23 @@
               <div
                 class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0"
               >
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  class="size-9 rounded-full bg-background/50 backdrop-blur-md border-primary/5 hover:bg-primary hover:text-primary-foreground transition-all"
-                  onclick={() => openEditDialog(snippet)}
-                >
-                  <Pencil class="size-4" />
-                  <span class="sr-only">Editar</span>
-                </Button>
+                <ShotsMorph expandWidth="700px" expandHeight="800px">
+                  {#snippet mini()}
+                    <div
+                      class="w-[96px] h-[36px] rounded-[32px] bg-background/50 backdrop-blur-md border border-white/10 flex items-center justify-center gap-1 p-0 text-xs font-bold transition-all hover:bg-primary hover:text-primary-foreground"
+                    >
+                      <Pencil class="size-4" /> Editar
+                    </div>
+                  {/snippet}
+                  {#snippet expand()}
+                    <SnippetForm
+                      languages={data.languages}
+                      {snippet}
+                      onSuccess={() => {}}
+                      onCancel={() => {}}
+                    />
+                  {/snippet}
+                </ShotsMorph>
 
                 <form
                   method="POST"
@@ -194,14 +195,25 @@
               mano.
             </p>
           </div>
-          <Button
-            onclick={openCreateDialog}
-            size="lg"
-            class="rounded-full px-10 h-14 text-base shadow-xl shadow-primary/20"
-            >Crear mi primer snippet</Button
-          >
+          <ShotsMorph expandWidth="700px" expandHeight="800px">
+            {#snippet mini()}
+              <div
+                class="rounded-full px-10 h-14 text-base shadow-xl shadow-primary/20 bg-primary flex items-center justify-center font-bold text-white cursor-pointer hover:scale-[1.05] transition-all"
+              >
+                Crear mi primer snippet
+              </div>
+            {/snippet}
+            {#snippet expand()}
+              <SnippetForm
+                languages={data.languages}
+                onSuccess={() => {}}
+                onCancel={() => {}}
+              />
+            {/snippet}
+          </ShotsMorph>
         </div>
       </div>
     {/each}
   </div>
 </div>
+```
